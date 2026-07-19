@@ -1,0 +1,48 @@
+.wf-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 2px solid #4a5568;
+  background: #ffffff;
+  color: #1a1a1a;
+  min-width: 140px;
+  font-size: 0.875rem;
+  cursor: grab;
+}
+
+.wf-node:focus-visible,
+.wf-node--selected {
+  outline: 3px solid #ffb703;
+  outline-offset: 2px;
+}
+
+.wf-node--start {
+  border-color: #2f855a;
+  background: #f0fff4;
+}
+
+.wf-node--end {
+  border-color: #c53030;
+  background: #fff5f5;
+}
+
+.wf-node--user-task {
+  border-color: #2b6cb0;
+  background: #ebf8ff;
+}
+
+.wf-node--rest {
+  border-color: #6b46c1;
+  background: #faf5ff;
+}
+
+.wf-node--gateway {
+  border-color: #b7791f;
+  background: #fffbea;
+}
+
+.wf-node__icon {
+  font-size: 1rem;
+}

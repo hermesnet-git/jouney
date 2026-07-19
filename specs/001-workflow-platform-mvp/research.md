@@ -102,3 +102,12 @@ restou nenhum `NEEDS CLARIFICATION` no Technical Context do `plan.md`.
   registrada como escolha técnica herdada do planejamento.md, não como
   exigência automática da constitution — sua aplicação real depende das
   tarefas de teste que `/speckit-tasks` gerar explicitamente.
+- **Nota de ambiente descoberta durante `/speckit-implement`**: o JDK 24
+  instalado neste ambiente de desenvolvimento não é compatível com o
+  ByteBuddy usado pelo Mockito para mockar classes concretas (`mock()` de uma
+  `@Service` como `EngineDispatcher`/`AuditService` falha; mockar interfaces
+  como os `*Repository` do Spring Data funciona normalmente). Os testes deste
+  repositório evitam mockar classes concretas — quando um teste precisaria
+  disso, ele instancia a classe real com suas dependências de interface
+  mockadas. Se este projeto migrar para um JDK 17/21 LTS estável, essa
+  restrição deixa de existir.

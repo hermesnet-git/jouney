@@ -1,0 +1,29 @@
+.validation-panel {
+  padding: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.validation-panel button {
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #2b6cb0;
+  background: #2b6cb0;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.validation-panel button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.validation-panel__ok {
+  color: #2f855a;
+  margin-top: 0.5rem;
+}
+
+.validation-panel__problems {
+  color: #c53030;
+  margin-top: 0.5rem;
+  padding-left: 1.25rem;
+}

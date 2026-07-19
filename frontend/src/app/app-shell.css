@@ -1,0 +1,60 @@
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.app-shell__nav {
+  width: 220px;
+  flex-shrink: 0;
+  background: #12203a;
+  color: #f5f7fa;
+  padding: 1rem;
+}
+
+.app-shell__brand {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.app-shell__nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.app-shell__nav a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  color: #dbe4f3;
+  text-decoration: none;
+}
+
+.app-shell__nav a:hover {
+  background: #1c3357;
+}
+
+.app-shell__nav a.active {
+  background: #2a4a80;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Constitution II: acessibilidade básica não é opcional — foco visível em todo elemento navegável */
+.app-shell__nav a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #ffb703;
+  outline-offset: 2px;
+}
+
+.app-shell__content {
+  flex: 1;
+  padding: 1.5rem;
+}
