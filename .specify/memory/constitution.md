@@ -1,50 +1,89 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: 1.0.0 → 2.0.0
+- Modified principles:
+  - II. Testing Standards → REMOVED (backward-incompatible principle removal)
+  - III. User Experience Consistency → renumbered to II
+  - IV. Performance Requirements → renumbered to III
+- Added sections: none
+- Removed sections: II. Testing Standards
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (Constitution Check gate is generic,
+    resolves against this file at plan time — no edit needed)
+  - ✅ .specify/templates/spec-template.md (no principle-specific references)
+  - ✅ .specify/templates/tasks-template.md (no testing-standards-specific
+    references; "Tests" sections remain OPTIONAL per template default, which
+    no longer conflicts with a mandatory testing principle)
+  - ✅ .claude/skills/speckit-*/SKILL.md (no stale principle names found)
+- Follow-up TODOs: none
+-->
+
+# Jouney Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Code Quality
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Code MUST be reviewed before merge; no direct commits to `main` bypass review.
+Every function and module MUST have a single, clear responsibility — if a change
+description needs "and" to explain what it does, split it. Linting and formatting
+MUST run clean (zero warnings) before a change is considered done; a project's
+configured linter/formatter is the source of truth, not personal style. Dead
+code, commented-out blocks, and speculative abstractions (interfaces with one
+implementation, config for values that never change) MUST be deleted, not kept
+"for later." Public functions, modules, and APIs MUST document their contract
+(inputs, outputs, error conditions) where the signature alone doesn't make it
+obvious.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Small, focused, reviewed changes are the cheapest point to catch
+defects and design drift. Unreviewed or sprawling changes are where regressions
+and unmaintainable abstractions enter the codebase.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. User Experience Consistency
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Interactions, terminology, and visual patterns MUST be consistent across the
+product — the same action (e.g., "delete," "cancel," "save") MUST look and
+behave the same way everywhere it appears. New UI MUST reuse existing
+components, copy patterns, and error-message conventions rather than inventing
+parallel ones. Every user-facing error MUST state what happened and what the
+user can do next — no bare stack traces or silent failures reaching the user.
+Accessibility basics (keyboard navigation, sufficient color contrast, alt text
+for meaningful images) are NON-NEGOTIABLE and MUST NOT be deferred as
+"polish."
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Inconsistency forces users to relearn the product in every
+screen; accessibility gaps exclude real users and are far cheaper to build in
+than to retrofit.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Performance Requirements
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Every feature with a user-facing interaction MUST define its performance
+budget (e.g., target response time, acceptable payload size) during planning,
+not after a user complains. Changes that risk regressing a defined budget
+(new dependency on a hot path, unbounded loop over user data, N+1 queries)
+MUST be measured before merge, not assumed safe. Performance-sensitive code
+MUST prefer the simplest approach that meets the budget — optimize only the
+measured bottleneck, not speculatively. Any deliberate performance shortcut
+(e.g., an unindexed query, an O(n²) scan) MUST be flagged in code with its
+known ceiling and the condition under which it needs revisiting.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Performance problems are cheap to prevent with a stated budget
+and expensive to diagnose once they're live and diffuse across the codebase.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes conflicting team conventions, ad hoc process, or
+prior undocumented practice. Any pull request or review MUST verify compliance
+with these principles; a reviewer who spots a violation MUST block merge until
+it is fixed or explicitly justified.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Amendments require: (1) a documented rationale for the change, (2) an update to
+this file with a version bump per semantic versioning (MAJOR for backward-
+incompatible principle removal/redefinition, MINOR for a new principle or
+materially expanded guidance, PATCH for clarification/wording), and (3)
+propagation of the change to any dependent templates or guidance docs in the
+same commit. Complexity or deviation from a principle MUST be justified in
+writing (e.g., in a plan's Complexity Tracking table) — "it's simpler this way"
+is not sufficient on its own; the simpler alternative must be shown insufficient.
+
+**Version**: 2.0.0 | **Ratified**: 2026-07-18 | **Last Amended**: 2026-07-19
