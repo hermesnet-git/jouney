@@ -5,36 +5,28 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.jouney.workflow.definition.WorkflowDefinition;
 import com.jouney.workflow.definition.WorkflowDefinitionRepository;
+import com.jouney.workflow.definition.WorkflowDefinitionService;
 import com.jouney.workflow.shared.error.ValidationFailedException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * research.md #7 — integração com PostgreSQL real via Testcontainers. Requer Docker disponível;
- * neste ambiente de desenvolvimento o Docker ainda não estava configurado no momento em que este
- * teste foi escrito (ver relato de implementação).
+ * research.md #7 — integração com PostgreSQL real. Requer um PostgreSQL rodando localmente na
+ * URL/credenciais de `application.yml` (ver README.md — "Banco de dados"); as migrações Flyway
+ * rodam automaticamente ao subir o contexto. Rodar com `mvn verify` (não entra no `mvn test`).
+ * {@code @Transactional} aqui desfaz os dados de cada teste ao final (banco persistente real, sem
+ * container efêmero), evitando colisão de `workflow_key` entre execuções.
  */
-@Testcontainers
+@Tag("requires-postgres")
 @SpringBootTest
+@Transactional
 class PublicationIntegrationTest {
 
-  @Container
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
-  @DynamicPropertySource
-  static void datasourceProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", postgres::getJdbcUrl);
-    registry.add("spring.datasource.username", postgres::getUsername);
-    registry.add("spring.datasource.password", postgres::getPassword);
-  }
-
   @Autowired private WorkflowDefinitionRepository definitionRepository;
+  @Autowired private WorkflowDefinitionService definitionService;
   @Autowired private PublicationService publicationService;
   @Autowired private WorkflowVersionRepository versionRepository;
 
@@ -50,7 +42,7 @@ class PublicationIntegrationTest {
   void publishingCreatesImmutableActiveVersion() {
     WorkflowDefinition definition =
         definitionRepository.save(new WorkflowDefinition("k1", "n", null, "alice"));
-    definition.updateDraft("n", null, VALID_GRAPH);
+    definitionService.updateDraft(definition.getId(), "n", null, VALID_GRAPH);
 
     WorkflowVersion version = publicationService.publish(definition.getId(), "alice");
 
@@ -63,7 +55,7 @@ class PublicationIntegrationTest {
   void publishingWithInvalidGraphIsBlockedWithAllProblems() {
     WorkflowDefinition definition =
         definitionRepository.save(new WorkflowDefinition("k2", "n", null, "alice"));
-    definition.updateDraft("n", null, "{\"nodes\":[]}");
+    definitionService.updateDraft(definition.getId(), "n", null, "{\"nodes\":[]}");
 
     assertThatThrownBy(() -> publicationService.publish(definition.getId(), "alice"))
         .isInstanceOf(ValidationFailedException.class)

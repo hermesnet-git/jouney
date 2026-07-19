@@ -1,7 +1,7 @@
 import type { Edge, Node } from 'reactflow'
 
 export interface WorkflowNodeConfig {
-  formKey?: string
+  formSchema?: { title: string; fields: unknown[] }
   assignment?: { type: 'INITIATOR' | 'GROUP'; group?: string }
   connectorId?: string
   operation?: string

@@ -62,8 +62,11 @@ public class GraphValidator {
         problems.add("Etapa '" + node.name() + "' (" + node.id() + ") está desconectada.");
       }
       if (NodeType.USER_TASK.name().equals(node.type())) {
-        Object formKey = node.configuration() == null ? null : node.configuration().get("formKey");
-        if (formKey == null || formKey.toString().isBlank()) {
+        // ver UserTaskNodeExecutor: o schema do formulário fica embutido em "formSchema",
+        // não referenciado por chave — mantém consistência entre validação e execução.
+        Object formSchema =
+            node.configuration() == null ? null : node.configuration().get("formSchema");
+        if (formSchema == null) {
           problems.add("Tarefa humana '" + node.name() + "' não tem um formulário configurado.");
         }
       }

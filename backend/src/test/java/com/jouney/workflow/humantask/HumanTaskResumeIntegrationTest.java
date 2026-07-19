@@ -4,37 +4,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jouney.workflow.definition.WorkflowDefinition;
 import com.jouney.workflow.definition.WorkflowDefinitionRepository;
+import com.jouney.workflow.definition.WorkflowDefinitionService;
 import com.jouney.workflow.publication.PublicationService;
 import com.jouney.workflow.publication.WorkflowVersion;
 import com.jouney.workflow.runtime.InstanceService;
 import com.jouney.workflow.runtime.WorkflowInstance;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.transaction.annotation.Transactional;
 
-/** T042 — retomada automática da execução após concluir a tarefa (US3). */
-@Testcontainers
+/**
+ * T042 — retomada automática da execução após concluir a tarefa (US3). Requer um PostgreSQL rodando
+ * localmente (ver README.md — "Banco de dados"). Rodar com `mvn verify` (não entra no `mvn test`).
+ * {@code @Transactional} desfaz os dados ao final (banco persistente real).
+ */
+@Tag("requires-postgres")
 @SpringBootTest
+@Transactional
 class HumanTaskResumeIntegrationTest {
 
-  @Container
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
-  @DynamicPropertySource
-  static void datasourceProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", postgres::getJdbcUrl);
-    registry.add("spring.datasource.username", postgres::getUsername);
-    registry.add("spring.datasource.password", postgres::getPassword);
-  }
-
   @Autowired private WorkflowDefinitionRepository definitionRepository;
+  @Autowired private WorkflowDefinitionService definitionService;
   @Autowired private PublicationService publicationService;
   @Autowired private InstanceService instanceService;
   @Autowired private HumanTaskService humanTaskService;
@@ -59,7 +53,7 @@ class HumanTaskResumeIntegrationTest {
   void completingTheTaskResumesExecutionToCompletion() {
     WorkflowDefinition definition =
         definitionRepository.save(new WorkflowDefinition("ht", "Com tarefa", null, "alice"));
-    definition.updateDraft("Com tarefa", null, GRAPH);
+    definitionService.updateDraft(definition.getId(), "Com tarefa", null, GRAPH);
     WorkflowVersion version = publicationService.publish(definition.getId(), "alice");
 
     WorkflowInstance instance = instanceService.start(version.getId(), "biz-1", "alice");

@@ -86,17 +86,24 @@ restou nenhum `NEEDS CLARIFICATION` no Technical Context do `plan.md`.
 
 ## 7. Estratégia de testes herdada do planejamento.md
 
-- **Decision**: Backend — JUnit 5 + Testcontainers (PostgreSQL real) para
+- **Decision**: Backend — JUnit 5 + PostgreSQL local real (sem containers) para
   integração, unitários para transições/expressões/estado/retry, testes de
   arquitetura para impedir dependência indevida entre os 9 módulos. Frontend —
   testes de componente para nós customizados/painel de propriedades/
   serialização/validação de grafo, mais testes end-to-end do fluxo
-  designer→publicação→execução.
+  designer→publicação→execução. Os testes de integração que precisam de banco
+  são marcados com `@Tag("requires-postgres")` e rodam separados via Maven
+  Failsafe (`mvn verify`); os demais rodam em `mvn test` (Surefire), incluindo
+  vários `*IntegrationTest` que não tocam banco (usam mocks ou um `HttpServer`
+  local) — a separação é pela tag, não pelo nome do arquivo.
 - **Rationale**: Seção 15 do planejamento.md já define essa estratégia em
   detalhe; mantê-la evita divergência entre teste com mock e comportamento
   real do banco/motor.
 - **Alternatives considered**: Mockar o banco em todos os testes (rejeitado no
-  próprio doc-fonte).
+  próprio doc-fonte). Testcontainers/Docker para provisionar o Postgres nos
+  testes (tentado primeiro, revertido — ver nota de ambiente abaixo). Rodar
+  tudo em `mvn test` sem separação (rejeitado: quebraria CI e qualquer
+  desenvolvedor sem Postgres local rodando).
 - **Nota de gate**: a constitution v2.0.0 deste repositório não tem mais um
   princípio de Testing Standards (removido em sessão anterior). Esta decisão é
   registrada como escolha técnica herdada do planejamento.md, não como
@@ -111,3 +118,26 @@ restou nenhum `NEEDS CLARIFICATION` no Technical Context do `plan.md`.
   disso, ele instancia a classe real com suas dependências de interface
   mockadas. Se este projeto migrar para um JDK 17/21 LTS estável, essa
   restrição deixa de existir.
+- **Nota de ambiente — Docker removido**: Docker foi tentado inicialmente
+  (Testcontainers) mas o ambiente de desenvolvimento não tinha WSL2
+  configurado e o daemon nunca ficou disponível de forma confiável nesta
+  sessão. O usuário optou por instalar PostgreSQL localmente em vez de
+  destravar o Docker. Toda a configuração de Docker foi removida do
+  repositório (`docker-compose.yml`, dependências `org.testcontainers.*` e o
+  BOM correspondente no `pom.xml`); os 3 testes que precisam de banco foram
+  reescritos para usar o `DataSource` configurado em `application.yml`
+  (`localhost:5432/workflow_platform`) em vez de um container efêmero, e
+  marcados `@Transactional` para desfazer os dados ao final de cada teste
+  (necessário porque o banco agora é persistente entre execuções, diferente
+  de um container Testcontainers descartado a cada rodada).
+- **Bugs reais encontrados só ao rodar contra Postgres de verdade** (nunca
+  detectados antes porque os testes de integração nunca tinham rodado neste
+  ambiente): (1) os testes chamavam `WorkflowDefinition.updateDraft(...)`
+  diretamente na entidade após `repository.save(...)`, o que não persiste —
+  corrigido para usar `WorkflowDefinitionService.updateDraft(...)`, o mesmo
+  caminho que `WorkflowController` usa de verdade; (2) `GraphValidator`
+  exigia o campo `formKey` numa etapa `USER_TASK`, mas `UserTaskNodeExecutor`
+  (e o designer no frontend) usam `formSchema` embutido — nenhum workflow com
+  tarefa humana conseguia ser publicado. Corrigido nos dois lados
+  (`GraphValidator.java` e `PropertiesPanel.tsx`), padronizando em
+  `formSchema`.

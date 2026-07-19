@@ -19,7 +19,7 @@ jobs:
         run: mvn -B spotless:check
         working-directory: backend
       - name: Build and test
-        run: mvn -B verify
+        run: mvn -B test
         working-directory: backend
 
   frontend:

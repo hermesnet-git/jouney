@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@telefonica/mistica": "^17.0.0"
+  }
+}

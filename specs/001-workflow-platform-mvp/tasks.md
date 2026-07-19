@@ -74,7 +74,7 @@ permitir implementação e teste independentes de cada uma.
 ### Tests for User Story 1
 
 - [X] T017 [P] [US1] Teste unitário do validador de grafo (início ausente, nó desconectado, gateway sem condição, tarefa humana sem formulário, etapa inalcançável, fim ausente — FR-004) em `backend/src/test/java/com/jouney/workflow/definition/GraphValidatorTest.java`
-- [X] T018 [P] [US1] Teste de integração: publicar cria uma Workflow Version imutável e bloqueia nova publicação com problemas de validação em `backend/src/test/java/com/jouney/workflow/publication/PublicationIntegrationTest.java` (⚠ requer Docker — ver relato de implementação)
+- [X] T018 [P] [US1] Teste de integração: publicar cria uma Workflow Version imutável e bloqueia nova publicação com problemas de validação em `backend/src/test/java/com/jouney/workflow/publication/PublicationIntegrationTest.java` (rodou contra PostgreSQL local de verdade via `mvn verify` — passou; achou e corrigiu um bug real de persistência no próprio teste)
 - [X] T019 [P] [US1] Teste de componente: serialização do grafo React Flow ↔ JSON (seção 5) em `frontend/tests/workflow-designer/serialization.test.tsx`
 
 ### Implementation for User Story 1
@@ -105,7 +105,7 @@ permitir implementação e teste independentes de cada uma.
 ### Tests for User Story 2
 
 - [X] T032 [P] [US2] Teste unitário das transições de estado da instância (CREATED→RUNNING→...→COMPLETED/FAILED/CANCELLED, seção 6) em `backend/src/test/java/com/jouney/workflow/runtime/InstanceStateMachineTest.java`
-- [X] T033 [P] [US2] Teste de integração (Testcontainers, Postgres real): execução sequencial início→fim com histórico completo em `backend/src/test/java/com/jouney/workflow/runtime/SequentialExecutionIntegrationTest.java` (⚠ requer Docker — ver relato de implementação)
+- [X] T033 [P] [US2] Teste de integração (PostgreSQL local real, sem Docker/Testcontainers): execução sequencial início→fim com histórico completo em `backend/src/test/java/com/jouney/workflow/runtime/SequentialExecutionIntegrationTest.java` (rodou via `mvn verify` — passou)
 
 ### Implementation for User Story 2
 
@@ -130,7 +130,7 @@ permitir implementação e teste independentes de cada uma.
 ### Tests for User Story 3
 
 - [X] T041 [P] [US3] Teste unitário de validação de formulário (campo obrigatório ausente, FR-012) em `backend/src/test/java/com/jouney/workflow/humantask/FormValidationTest.java`
-- [X] T042 [P] [US3] Teste de integração: retomada automática da execução após concluir a tarefa em `backend/src/test/java/com/jouney/workflow/humantask/HumanTaskResumeIntegrationTest.java` (⚠ requer Docker — ver relato de implementação)
+- [X] T042 [P] [US3] Teste de integração: retomada automática da execução após concluir a tarefa em `backend/src/test/java/com/jouney/workflow/humantask/HumanTaskResumeIntegrationTest.java` (rodou contra PostgreSQL local via `mvn verify` — passou; achou e corrigiu um bug real de inconsistência `formKey`/`formSchema` entre `GraphValidator` e `UserTaskNodeExecutor`)
 
 ### Implementation for User Story 3
 
@@ -226,9 +226,9 @@ permitir implementação e teste independentes de cada uma.
 - [X] T075 [P] Auditoria final de acessibilidade em todas as telas (designer T026-T028, inbox T050, dashboard T073) — confirma o que já foi implementado desde US1, não é a primeira nem única tarefa de acessibilidade (constitution II) em `frontend/src/`
 - [X] T076 [P] Métricas (instâncias iniciadas/concluídas/com erro, tempos médios por workflow/nó, erros por conector, retentativas — seção 14) em `backend/src/main/java/com/jouney/workflow/shared/` — `WorkflowMetrics` via Micrometer/Actuator, exposta em `/actuator/metrics` e `/actuator/prometheus`
 - [X] T077 [P] Testes de arquitetura (impedir dependência indevida entre os 9 módulos) em `backend/src/test/java/com/jouney/workflow/architecture/` — `runtime`↔`humantask` tem acoplamento bidirecional intencional, documentado no próprio teste
-- [X] T078 Rodar `quickstart.md` de ponta a ponta e corrigir divergências encontradas — revisão a frio (sem Docker/OIDC neste ambiente): todos os 9 passos têm endpoint/UI correspondente implementado; execução real fica pendente até Docker/Postgres/OIDC estarem disponíveis
+- [X] T078 Rodar `quickstart.md` de ponta a ponta e corrigir divergências encontradas — parcialmente validado: backend sobe de verdade contra PostgreSQL local (`mvn spring-boot:run`, confirmado respondendo em `:8080`) e os testes de integração (US1/US2/US3) passam contra o banco real; os passos 1-9 completos via UI/OIDC autenticado ainda não foram exercitados manualmente (falta um provedor OIDC configurado)
 - [X] T079 [P] README de setup local (backend + frontend + banco) na raiz do repositório, incluindo confirmação de que a interface é só PT-BR sem framework de i18n (FR-023)
-- [X] T080 [P] Teste de carga/concorrência validando SC-008 (algumas dezenas de execuções simultâneas sem degradação perceptível nos endpoints de instância/inbox) em `backend/src/test/java/com/jouney/workflow/runtime/ConcurrentExecutionLoadTest.java` (⚠ requer Docker)
+- [~] T080 [P] Teste de carga/concorrência validando SC-008 — **descontinuado a pedido do usuário** ("testes de volumetria que não utilizarei neste momento"); `ConcurrentExecutionLoadTest.java` foi removido. Ver constitution.md (Governance) para a exceção formal ao princípio III (Performance) cobrindo este descope. Reintroduzir quando volumetria/carga voltar a ser uma prioridade.
 
 ---
 
@@ -317,6 +317,6 @@ Com múltiplos desenvolvedores (seção 18 do planejamento.md):
 - Verificar que os testes falham antes de implementar
 - Fazer commit após cada tarefa ou grupo lógico
 - Parar em cada checkpoint para validar a story isoladamente
-- Total: 80 tarefas (T001-T080) — 6 no Setup, 10 no Foundational, 63 distribuídas nas 6 user stories, 6 no Polish
+- Total: 80 tarefas planejadas (T001-T080), 79 concluídas — 6 no Setup, 10 no Foundational, 63 distribuídas nas 6 user stories, 5 concluídas + 1 descontinuada (T080) no Polish
 - Acessibilidade (constitution II) é tratada desde T026-T028 (US1) e T050/T073, não só em T075 — ver `/speckit-analyze` (achado C1)
-- SC-008 (escala) tem verificação dedicada em T080 — ver `/speckit-analyze` (achado H1)
+- SC-008 (escala) tinha verificação dedicada em T080, descontinuada a pedido do usuário — ver constitution.md (Governance) para a exceção formal

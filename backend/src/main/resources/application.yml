@@ -3,8 +3,8 @@ spring:
     name: workflow-platform
   datasource:
     url: jdbc:postgresql://localhost:5432/workflow_platform
-    username: ${DB_USERNAME:workflow_platform}
-    password: ${DB_PASSWORD:workflow_platform}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: validate

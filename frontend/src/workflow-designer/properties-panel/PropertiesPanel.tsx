@@ -92,15 +92,33 @@ export function PropertiesPanel({
 
       {data.nodeType === 'USER_TASK' && (
         <>
-          <label htmlFor="node-form-key">Formulário</label>
-          <input
-            id="node-form-key"
-            type="text"
-            placeholder="ex.: personal-data"
-            value={(data.configuration.formKey as string) ?? ''}
-            onChange={(e) =>
-              onChangeNode(selectedNode.id, { configuration: { ...data.configuration, formKey: e.target.value } })
+          <label htmlFor="node-form-schema">
+            Formulário (JSON: title/fields — seção 9 do planejamento.md)
+          </label>
+          <textarea
+            id="node-form-schema"
+            rows={6}
+            defaultValue={
+              data.configuration.formSchema ? JSON.stringify(data.configuration.formSchema, null, 2) : ''
             }
+            placeholder={
+              '{\n  "title": "Dados pessoais",\n  "fields": [\n    { "key": "name", "label": "Nome", "type": "text", "required": true }\n  ]\n}'
+            }
+            onBlur={(e) => {
+              const raw = e.target.value.trim()
+              if (!raw) {
+                const { formSchema: _drop, ...rest } = data.configuration
+                onChangeNode(selectedNode.id, { configuration: rest })
+                return
+              }
+              try {
+                onChangeNode(selectedNode.id, {
+                  configuration: { ...data.configuration, formSchema: JSON.parse(raw) },
+                })
+              } catch {
+                // JSON inválido: mantém o valor anterior até o usuário corrigir
+              }
+            }}
           />
 
           <label htmlFor="node-assignment">Atribuição</label>

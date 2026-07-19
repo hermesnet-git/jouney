@@ -1,20 +1,17 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 2.0.0
-- Modified principles:
-  - II. Testing Standards → REMOVED (backward-incompatible principle removal)
-  - III. User Experience Consistency → renumbered to II
-  - IV. Performance Requirements → renumbered to III
-- Added sections: none
-- Removed sections: II. Testing Standards
+- Version change: 2.0.0 → 2.0.1
+- Modified principles: none (Governance clarification only, no principle text changed)
+- Added sections: Governance — "Documented deviation — automated load/volumetry
+  testing" paragraph
+- Removed sections: none
 - Templates requiring updates:
-  - ✅ .specify/templates/plan-template.md (Constitution Check gate is generic,
-    resolves against this file at plan time — no edit needed)
-  - ✅ .specify/templates/spec-template.md (no principle-specific references)
-  - ✅ .specify/templates/tasks-template.md (no testing-standards-specific
-    references; "Tests" sections remain OPTIONAL per template default, which
-    no longer conflicts with a mandatory testing principle)
-  - ✅ .claude/skills/speckit-*/SKILL.md (no stale principle names found)
+  - ✅ .specify/templates/plan-template.md (no change needed — this is a
+    project-level deviation record, not a new gate)
+  - ✅ .specify/templates/spec-template.md (no change needed)
+  - ✅ .specify/templates/tasks-template.md (no change needed)
+  - ✅ specs/001-workflow-platform-mvp/tasks.md (T080 already marked
+    descontinuado, cross-references this entry)
 - Follow-up TODOs: none
 -->
 
@@ -86,4 +83,17 @@ same commit. Complexity or deviation from a principle MUST be justified in
 writing (e.g., in a plan's Complexity Tracking table) — "it's simpler this way"
 is not sufficient on its own; the simpler alternative must be shown insufficient.
 
-**Version**: 2.0.0 | **Ratified**: 2026-07-18 | **Last Amended**: 2026-07-19
+**Documented deviation — automated load/volumetry testing (2026-07-19)**: The
+`workflow-platform-mvp` feature defers automated load/volumetry test
+infrastructure (e.g., a concurrent-execution test validating SC-008's "dezenas
+de execuções simultâneas") by explicit user decision, after Docker/Testcontainers
+proved unavailable in the development environment and the user chose to run
+entirely against a local, non-containerized PostgreSQL instance instead. This
+does **not** waive Principle III's requirement to define a performance budget
+during planning — the budgets already recorded in `plan.md` and SC-008 in
+`spec.md` remain the target. It waives only the requirement for a MUST-measured
+automated test proving that budget before merge, until volumetry becomes a
+priority for this project. See `specs/001-workflow-platform-mvp/research.md`
+and `tasks.md` (T080) for the removed test and full rationale.
+
+**Version**: 2.0.1 | **Ratified**: 2026-07-18 | **Last Amended**: 2026-07-19
